@@ -1,0 +1,126 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# iPSC Organoid Criticality — Default Configuration
+# All experiment-specific configs inherit from and override these values.
+# ─────────────────────────────────────────────────────────────────────────────
+
+project:
+  name: "iPSC_Organoid_Criticality"
+  version: "1.0.0"
+  seed: 42
+  drive_root: "/content/drive/MyDrive/OrganoidCriticality"
+  log_dir: "/content/drive/MyDrive/OrganoidCriticality/logs"
+  checkpoint_dir: "/content/drive/MyDrive/OrganoidCriticality/checkpoints"
+  results_dir: "/content/drive/MyDrive/OrganoidCriticality/results"
+
+data:
+  # Dataset source (set to "synthetic" for testing without real data)
+  source: "synthetic"                     # "synthetic" | "zenodo" | "local"
+  zenodo_url: "https://zenodo.org/record/XXXXXXX/files/organoid_mea.h5"
+  zenodo_sha256: "PLACEHOLDER_SHA256"
+  local_path: "data/raw/organoid_mea.h5"
+  processed_path: "data/processed/organoid_spikes.h5"
+
+  # MEA parameters
+  n_electrodes: 64                        # 8x8 MEA grid
+  sampling_rate: 20000                    # Hz
+  spike_threshold_uv: -30.0              # μV, negative threshold crossing
+  hp_cutoff_hz: 300.0                    # High-pass for MUA/spikes
+  lp_cutoff_hz: 3000.0                   # Low-pass for MUA/spikes
+  lfp_cutoff_hz: 100.0                   # Low-pass for LFP
+  lfp_downsample_factor: 20             # 20kHz → 1kHz for LFP
+
+  # Windowing
+  window_size_s: 10.0                    # seconds per analysis window
+  stride_size_s: 5.0                     # stride (50% overlap)
+  bin_size_ms: 1.0                       # spike bin size in ms
+  n_bins_per_window: 10000               # = window_size_s * 1000ms/s
+
+  # Genotypes (0=Control, 1=DISC1, 2=SHANK3, 3=22q11)
+  genotype_labels:
+    Control: 0
+    DISC1: 1
+    SHANK3: 2
+    "22q11": 3
+
+  # Developmental timepoints (DIV = Days In Vitro)
+  div_timepoints: [0, 7, 14, 21, 28, 35, 42]
+  criticality_window_div: [7, 28]        # Expected synchrony-emergence window
+
+  # Train/Val/Test split (by organoid lines, not windows)
+  train_frac: 0.70
+  val_frac: 0.15
+  test_frac: 0.15
+
+  # Downloader
+  chunk_size: 8192                       # bytes
+  max_ram_gb: 4.0                        # max data loaded into RAM at once
+
+  # Synthetic data (for testing / CI)
+  synthetic:
+    n_organoids_per_genotype: 4
+    recording_duration_s: 120.0
+    spontaneous_rate: 0.005             # spikes/neuron/ms at baseline
+
+avalanche:
+  threshold: 0                           # min active electrodes to define event
+  min_size: 2                            # min avalanche size (spikes)
+  max_duration_bins: 500                 # max duration in bins
+  xmin_method: "auto"                    # "auto" | float (manual x_min for powerlaw)
+
+dfa:
+  scales: [4, 8, 16, 32, 64, 128, 256, 512]
+  fit_range: [8, 256]                    # scales to use for H estimation
+
+model:
+  type: "CriticalityNet"
+  n_electrodes: 64
+  n_time_bins: 1000                      # input time dimension (1s at 1ms bins)
+  hidden_dim: 128
+  n_tcn_layers: 4
+  tcn_kernel_size: 3
+  dropout: 0.2
+  n_criticality_classes: 3              # subcritical, critical, supercritical
+  n_genotype_classes: 4
+  use_genotype_head: true
+  use_branching_ratio_head: true
+
+training:
+  batch_size: 32
+  gradient_accumulation_steps: 4        # effective batch = 32 * 4 = 128
+  n_epochs: 100
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-4
+  lr_schedule: "cosine_warmup"
+  warmup_epochs: 5
+  early_stopping_patience: 15
+  early_stopping_metric: "val_f1"
+  mixed_precision: true
+  num_workers: 2
+  pin_memory: true
+  save_every_n_epochs: 5
+  max_checkpoints_to_keep: 3
+
+  # Loss weights
+  loss_weights:
+    criticality_ce: 1.0
+    branching_ratio_mse: 0.5
+    genotype_ce: 0.3
+    consistency: 0.2
+
+evaluation:
+  batch_size: 64
+  metrics:
+    - accuracy
+    - f1_macro
+    - roc_auc_ovr
+    - rmse_branching_ratio
+    - concordance_branching_ratio
+
+figure:
+  width_mm: 84                           # JCNS single column
+  dpi: 300
+  font_family: "Arial"
+  font_size: 7
+  format: ["tiff", "eps"]
+  colormap_genotype: "tab10"
+  colormap_div: "viridis"
