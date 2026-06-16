@@ -1,0 +1,27 @@
+# SHANK3 Autism / Phelan-McDermid Syndrome — Configuration Overrides
+
+project:
+  name: "iPSC_Organoid_Criticality_SHANK3"
+
+data:
+  genotype_filter: ["Control", "SHANK3"]
+
+model:
+  n_genotype_classes: 2
+
+training:
+  learning_rate: 1.0e-3
+  n_epochs: 100
+  loss_weights:
+    criticality_ce: 1.0
+    branching_ratio_mse: 0.6
+    genotype_ce: 0.4
+    consistency: 0.4                    # higher: supercritical bursts require consistency
+
+# SHANK3 expected electrophysiology
+phenotype_priors:
+  expected_sigma_div14: 1.25           # supercritical early (burst storms)
+  expected_sigma_div28: 1.05           # approaches critical later
+  expected_H_div21: 1.15              # above 1.0: long-range temporal correlation
+  synchrony_onset_div: 10             # premature synchrony
+  burst_frequency_scale: 2.5          # ~2.5x more frequent network bursts
