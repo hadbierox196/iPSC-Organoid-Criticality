@@ -1,0 +1,25 @@
+# 22q11.2 Deletion Syndrome — Configuration Overrides
+
+project:
+  name: "iPSC_Organoid_Criticality_22q11"
+
+data:
+  genotype_filter: ["Control", "22q11"]
+
+model:
+  n_genotype_classes: 2
+
+training:
+  learning_rate: 7.5e-4
+  n_epochs: 110
+  loss_weights:
+    criticality_ce: 1.0
+    branching_ratio_mse: 0.7
+    genotype_ce: 0.4
+    consistency: 0.25
+
+phenotype_priors:
+  expected_sigma_div21: 0.91          # near-critical but slightly sub
+  expected_H_div21: 0.78
+  synchrony_onset_div: 24            # moderate delay
+  gamma_power_scale: 0.55            # reduced gamma-band LFP power
