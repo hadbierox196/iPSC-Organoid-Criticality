@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Data / Arrays (never commit raw data)
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pkl
+*.pickle
+data/raw/
+data/processed/
+data/interim/
+
+# Model checkpoints
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+
+# Results (large files)
+results/*.tiff
+results/*.eps
+results/*.pdf
+results/figures/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Google Drive mount artifacts
+drive/
+
+# IDE
+.venv/
+.env
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TensorBoard logs
+runs/
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Dist
+*.tar.gz
+*.whl
