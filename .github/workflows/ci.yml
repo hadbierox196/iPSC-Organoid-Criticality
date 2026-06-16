@@ -1,0 +1,30 @@
+name: CI — 2-Epoch Dry Run
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies (CPU-only subset)
+        run: |
+          pip install --upgrade pip
+          # Install CPU-only torch to keep CI fast
+          pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy==1.26.4 scipy==1.13.0 pandas==2.2.2 \
+                      scikit-learn==1.5.0 tqdm==4.66.4 pyyaml==6.0.
