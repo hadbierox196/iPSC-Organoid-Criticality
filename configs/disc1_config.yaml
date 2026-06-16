@@ -1,0 +1,27 @@
+# DISC1 Schizophrenia Model — Configuration Overrides
+# Inherits all defaults; only deviations listed here.
+
+project:
+  name: "iPSC_Organoid_Criticality_DISC1"
+
+data:
+  genotype_filter: ["Control", "DISC1"]  # only load these two
+
+model:
+  n_genotype_classes: 2                  # Control vs DISC1
+
+training:
+  learning_rate: 5.0e-4                  # lower LR; DISC1 features subtler
+  n_epochs: 120
+  loss_weights:
+    criticality_ce: 1.0
+    branching_ratio_mse: 0.8             # higher weight: sigma deviation key feature
+    genotype_ce: 0.5
+    consistency: 0.3
+
+# DISC1 expected electrophysiology
+phenotype_priors:
+  expected_sigma_div21: 0.82            # subcritical
+  expected_H_div21: 0.61               # slightly below critical value ~1.0
+  synchrony_onset_div: 28              # delayed by ~1 week vs control
+  spontaneous_rate_scale: 0.7          # reduced baseline firing
